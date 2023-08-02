@@ -29,11 +29,12 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request, h) {
     const { id } = request.params;
-    const album = await this.service.getAlbumAbyId(id);
-
+    const album = await this.service.getAlbumById(id);
     const response = h.response({
       status: 'success',
-      data: album,
+      data: {
+        album,
+      },
     });
 
     response.code(200);
@@ -41,6 +42,7 @@ class AlbumsHandler {
   }
 
   async putAlbumByIdHandler(request, h) {
+    this.validator.validateAlbumPayload(request.payload);
     const { id } = request.params;
     const { name, year } = request.payload;
     await this.service.editAlbumById(id, { name, year });

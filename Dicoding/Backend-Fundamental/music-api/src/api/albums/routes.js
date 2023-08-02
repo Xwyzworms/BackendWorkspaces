@@ -8,17 +8,17 @@ function routes(handler) {
     {
       method: 'GET',
       path: '/albums/{id}',
-      handler: handler.getAlbumsById,
+      handler: handler.getAlbumByIdHandler,
     },
     {
       method: 'PUT',
       path: '/albums/{id}',
-      handler: handler.putAlbumsById,
+      handler: handler.putAlbumByIdHandler,
     },
     {
       method: 'DELETE',
       path: '/albums/{id}',
-      handler: handler.deleteAlbumsById,
+      handler: handler.deleteAlbumByIdHandler,
     },
   ];
 }

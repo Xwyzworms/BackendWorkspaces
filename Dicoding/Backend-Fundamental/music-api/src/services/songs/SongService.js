@@ -1,6 +1,8 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
+const { mapDBToSongModel } = require('../../utils');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class SongsService {
   constructor() {
@@ -26,12 +28,12 @@ class SongsService {
     } else if (albumId === undefined) {
       query = {
         text: insertQuery,
-        values: [title, year, genre, performer, duration, null],
+        values: [id, title, year, genre, performer, duration, null],
       };
     } else {
       query = {
         text: insertQuery,
-        values: [title, year, genre, performer, duration, albumId],
+        values: [id, title, year, genre, performer, duration, albumId],
       };
     }
     const result = await this.pool.query(query);
@@ -46,7 +48,9 @@ class SongsService {
   async getSongs() {
     const query = 'SELECT * FROM songs';
     const result = await this.pool.query(query);
-    return result; // TODO LATER-> Convert To model
+    const valueToReturn = result.rows.map((x) => mapDBToSongModel(x))
+      .map(({ id, title, performer }) => ({ id, title, performer }));
+    return valueToReturn;
   }
 
   async getSongById(id) {
@@ -56,11 +60,10 @@ class SongsService {
     };
 
     const result = await this.pool.query(query);
-
     if (!result.rows.length) {
-      throw new InvariantError('Gagal mendapatkan lagu, Id tidak ditemukan');
+      throw new NotFoundError('Gagal mendapatkan lagu, Id tidak ditemukan');
     }
-    return result; // TODO LATER -> convert to model
+    return result.rows.map(mapDBToSongModel)[0]; // TODO LATER -> convert to model
   }
 
   async editSongById(id, {
@@ -90,18 +93,18 @@ class SongsService {
     }
     const result = await this.pool.query(query);
     if (!result.rows.length) {
-      throw new InvariantError('Gagal mempebarui lagu, id tidak ditemukan');
+      throw new NotFoundError('Gagal mempebarui lagu, id tidak ditemukan');
     }
   }
 
   async deleteSongById(id) {
     const query = {
-      text: 'DELETE * FROM songs where song_id=$1',
+      text: 'DELETE FROM songs WHERE song_id=$1 RETURNING song_id',
       values: [id],
     };
     const result = await this.pool.query(query);
     if (!result.rows.length) {
-      throw new InvariantError('Gagal menghapus lagu, id tidak ditemukan');
+      throw new NotFoundError('Gagal menghapus lagu, id tidak ditemukan');
     }
   }
 }
