@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
+const { mapDBToAlbumModel } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -20,6 +21,7 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new InvariantError('TODO Later');
     }
+    return result.rows[0].album_id;
   }
 
   async getAlbumById(id) {
@@ -30,8 +32,9 @@ class AlbumsService {
 
     const result = await this.pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError('Gagal mendapatkan lagu, id tidak ditemukan');
+      throw new NotFoundError('Gagal mendapatkan Album, id tidak ditemukan');
     }
+    return result.rows.map(mapDBToAlbumModel)[0];
   }
 
   async editAlbumById(id, { name, year }) {
@@ -49,10 +52,9 @@ class AlbumsService {
 
   async deleteAlbumById(id) {
     const query = {
-      text: 'DELETE * FROM albums where album_id = $1 RETURNING album_id',
+      text: 'DELETE FROM albums where album_id = $1 RETURNING album_id',
       values: [id],
     };
-
     const result = await this.pool.query(query);
 
     if (!result.rows.length) {

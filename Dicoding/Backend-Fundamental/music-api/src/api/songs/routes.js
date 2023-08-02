@@ -13,17 +13,17 @@ function routes(handler) {
     {
       method: 'GET',
       path: '/songs/{id}',
-      handler: handler.getSongByid,
+      handler: handler.getSongByIdHandler,
     },
     {
       method: 'PUT',
       path: '/songs/{id}',
-      handler: handler.putSongById,
+      handler: handler.putSongByIdHandler,
     },
     {
       method: 'DELETE',
       path: '/songs/{id}',
-      handler: handler.deleteSongById,
+      handler: handler.deleteSongByIdHandler,
     },
   ];
 }
