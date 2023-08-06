@@ -3,7 +3,7 @@ pm.test('response status code should have 403 value', ()=> {
 });
 
 pm.test('response Content-Type header should have application/json; charset=utf-8 ', ()=> {
-    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json');
+    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');
 }) 
 
 pm.test('response body should contains correct value', ()=> {
@@ -14,5 +14,5 @@ pm.test('response body should contains correct value', ()=> {
     pm.expect(responseJson.status).to.equals('fail');
 
     pm.expect(responseJson).to.ownProperty('message');
-    pm.expect(resposneJson).to.equals('Anda tidak berhak mengakses resource ini');
+    pm.expect(responseJson.message).to.equals('Anda tidak berhak mengakses resource ini');
 });

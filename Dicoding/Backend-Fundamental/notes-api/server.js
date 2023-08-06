@@ -9,16 +9,22 @@ const notes = require("./src/api/notes/index");
 const NotesService = require("./src/services/postgres/NotesService");
 const NotesValidator = require("./src/validator/notes");
 
+
 const authentications = require('./src/api/authentications/index');
 const AuthenticationService = require('./src/services/postgres/AuthenticationService');
 const AuthenticationsValidator = require('./src/validator/auth/index');
 const TokenManager = require('./src/tokenize/TokenManager');
 
+const collaborations = require('./src/api/collaborations');
+const CollaborationService = require('./src/services/postgres/CollaborationService');
+const CollaborationValidator = require('./src/validator/collaborations/index');
 
 require("dotenv").config();
 
 const initServer = async () => {
-  const notesService = new NotesService();
+
+  const collaborationService = new CollaborationService();
+  const notesService = new NotesService(collaborationService);
   const usersService = new UsersService();
   const authenticationService = new AuthenticationService();
 
@@ -77,10 +83,19 @@ const initServer = async () => {
         tokenManager: TokenManager,
         validator: AuthenticationsValidator, 
       }
+    },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationService,
+        notesService,
+        validator: CollaborationValidator,
+      }
+
     }
   ]);
-  
-  
+
+
 
   await server.start();
   console.log("server is running");

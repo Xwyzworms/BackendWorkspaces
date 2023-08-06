@@ -3,22 +3,41 @@ const { nanoid } = require("nanoid");
 const InvariantError = require("../../exceptions/InvariantError");
 const { mapDBToModel } = require("../../utils");
 const NotFoundError = require("../../exceptions/NotFoundError");
+const AuthorizationError = require("../../exceptions/AuthorizationError");
 
 class NotesService {
-    constructor() {
+    constructor(collaborationService) {
         this._pool = new Pool();
+        this._collaborationService = collaborationService;
     }
 
 
-    async addNote({ title, body , tags}) {
+    async verifyNoteOwner(id, owner) {
+        const query = {
+            text: 'SELECT * FROM notes WHERE id = $1',
+            values: [id]
+        };
+        const result = await this._pool.query(query);
+        if(!result.rows.length ) {
+            throw new NotFoundError('Catatan tidak ditemukan');
+        }
+
+        const note = result.rows[0];
+
+        if(note.owner !== owner) {
+            throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
+        }
+    }
+
+    async addNote({ title, body , tags, owner}) {
 
         const id = nanoid(16);
         const createdAt = new Date().toISOString();
         const updatedAt = createdAt;
 
         const query = {
-            text : "INSERT INTO notes VALUES($1, $2, $3, $4, $5, $6) RETURNING id",
-            values :[id, title, body, tags, createdAt, updatedAt] 
+            text : "INSERT INTO notes VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+            values :[id, title, body, tags, createdAt, updatedAt, owner] 
         };
 
         this._pool = new Pool();
@@ -33,9 +52,18 @@ class NotesService {
 
     }
 
-    async getNotes() {
-        const query = "SELECT * FROM notes";
+    async getNotes(owner) {
+
+        const query =  { 
+            text: `SELECT notes.* FROM notes
+            LEFT JOIN collaborations ON collaborations.note_id = notes.id
+            WHERE notes.owner = $1 or collaborations.user_id = $1
+            GROUP BY notes.id`,
+            values: [owner]
+        }
+        console.log(query);
         const result = await this._pool.query(query);
+        console.log("The Rows bro", result);
         return result.rows.map(mapDBToModel);
     }
 
@@ -82,6 +110,28 @@ class NotesService {
 
         }
     }
+
+    async verifyNoteAccess(noteId, userId) {
+        try {
+            await this.verifyNoteOwner(noteId, userId);
+        }catch(e) {
+            if(e instanceof NotFoundError) {
+
+                throw e;
+            } 
+
+            try {
+                await this._collaborationService.verifyCollaborator(noteId, userId);
+
+            }catch {
+
+                throw e;
+            }
+
+        }
+    }
+
+
 }
 
 module.exports = NotesService;

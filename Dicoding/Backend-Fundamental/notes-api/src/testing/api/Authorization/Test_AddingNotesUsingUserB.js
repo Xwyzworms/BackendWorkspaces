@@ -2,8 +2,8 @@ pm.test("response status code should have 201 value", ()=> {
     pm.response.to.have.status(201);
 });
 
-pm.test('response Content-Type header should have value application/json; charset=utf-8', ()=> {
-    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json');
+pm.test('response Content-Type header should have value application/json;', ()=> {
+    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');
 })
 
 pm.test('response body data should contains note id ', () => {

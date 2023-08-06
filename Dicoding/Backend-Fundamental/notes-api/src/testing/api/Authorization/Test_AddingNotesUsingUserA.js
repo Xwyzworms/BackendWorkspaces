@@ -1,5 +1,5 @@
 pm.test('response status code should have 201 value', ()=> {
-    pm.response.to.have.status(200);
+    pm.response.to.have.status(201);
 });
 
 pm.test('response Content-type header should have application/json; charset=utf-8', ()=> {
