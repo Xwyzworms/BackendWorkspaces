@@ -22,6 +22,7 @@ module.exports = {
     ecmaVersion: 'latest',
   },
   rules: {
-     'linebreak-style': ['error', process.platform === 'win32' ? 'windows' : 'unix'],
+    'linebreak-style': ['error', process.platform === 'win32' ? 'windows' : 'unix'],
+    indent: ['error', 2],
   },
 };
