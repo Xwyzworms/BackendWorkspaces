@@ -9,7 +9,7 @@ class AuthenticationsHandler {
 
     this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
 
-    this.deleteAuthenticationhandler = this.deleteAuthenticationHandler.bind(this);
+    this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
   }
 
   async postAuthenticationHandler(request, h) {
@@ -19,11 +19,12 @@ class AuthenticationsHandler {
     const { username, password } = request.payload;
 
     const id = await this.usersService.verifyUserCredentials({ username, password });
-
     // Create Token manager
-    const accessToken = await this.tokenManager.createAccessToken({ id });
-    const refreshToken = await this.tokenManager.generateRefreshToken({ id });
+    const accessToken = this.tokenManager.generateAccessToken({ username });
 
+    const refreshToken = this.tokenManager.generateRefreshToken({ username });
+
+    await this.authenticationsService.addRefreshToken(refreshToken);
     const response = h.response({
       status: 'success',
       data: {
@@ -40,8 +41,8 @@ class AuthenticationsHandler {
 
     const { refreshToken } = request.payload;
     await this.authenticationsService.verifyRefreshToken(refreshToken);
-    const { id } = this.tokenManager.verifyRefreshToken(refreshToken);
-    const accessToken = this.tokenManager.generateAcessToken({ id });
+    const id = this.tokenManager.verifyRefreshToken(refreshToken);
+    const accessToken = this.tokenManager.generateAccessToken({ id });
 
     const response = h.response({
       status: 'success',
@@ -49,15 +50,17 @@ class AuthenticationsHandler {
         accessToken,
       },
     });
+
+    return response;
   }
 
   async deleteAuthenticationHandler(request, h) {
     this.validator.validateDeleteAuthenticationPayload(request.payload);
 
     const { refreshToken } = request.payload;
-
-    await this.usersService.verifyRefreshToken(refreshToken);
+    await this.authenticationsService.verifyRefreshToken(refreshToken);
     await this.authenticationsService.deleteRefreshToken(refreshToken);
+
     const response = h.response({
       status: 'success',
       message: 'Berhasil menghapus autentikasi',

@@ -18,6 +18,15 @@ const AuthenticationsService = require('./services/authentications/Authenticatio
 const AuthenticationsValidator = require('./validator/authentications/index');
 const TokenManager = require('./tokenize/TokenManager');
 
+const playlists = require('./api/playlists/index');
+const PlaylistsService = require('./services/playlists/PlaylistsService');
+const PlaylistsValidator = require('./validator/playlists/index');
+
+// Exports
+const exportsPlaylist = require('./api/exports/index');
+const PlaylistProducerService = require('./services/rabbitmq/exports/PlaylistProducerService');
+const ExportValidator = require('./validator/exports/index');
+
 require('dotenv').config();
 
 const initServer = async () => {
@@ -25,6 +34,7 @@ const initServer = async () => {
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const playlistsService = new PlaylistsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -41,7 +51,8 @@ const initServer = async () => {
       plugin: Jwt,
     },
   ]);
-  server.auth.strategy('musicapp_jtw', 'jwt', {
+
+  server.auth.strategy('musicapp_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
       aud: false,
@@ -52,7 +63,7 @@ const initServer = async () => {
     validate: (artifacts) => ({
       isValid: true,
       credentials: {
-        id: artifacts.decoded.payload.id,
+        username: artifacts.decoded.payload.username,
       },
     }),
 
@@ -86,7 +97,22 @@ const initServer = async () => {
         usersService,
         tokenManager: TokenManager,
         validator: AuthenticationsValidator,
-
+      },
+    },
+    {
+      plugin: playlists,
+      options: {
+        playlistsService,
+        songsService,
+        validator: PlaylistsValidator,
+      },
+    },
+    {
+      plugin: exportsPlaylist,
+      options: {
+        playlistProducerService: PlaylistProducerService,
+        validator: ExportValidator,
+        playlistsService,
       },
     },
   ]);

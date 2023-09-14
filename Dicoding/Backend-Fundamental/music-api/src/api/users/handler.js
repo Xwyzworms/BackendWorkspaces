@@ -8,16 +8,14 @@ class UsersHandler {
 
   async postUsersHandler(request, h) {
     this.validator.validateUserPayload(request.payload);
-
     const id = await this.usersService.addUser(request.payload);
-
     const response = h.response({
       status: 'success',
       data: {
         userId: id,
       },
     });
-
+    response.code(201);
     return response;
   }
 }

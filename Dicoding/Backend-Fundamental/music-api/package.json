@@ -20,10 +20,15 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.2",
+    "@hapi/jwt": "^3.2.0",
+    "amqp": "^0.2.7",
+    "amqplib": "^0.10.3",
+    "bcrypt": "^5.1.0",
     "dotenv": "^16.3.1",
     "joi": "^17.9.2",
     "nanoid": "^3.3.4",
     "node-pg-migrate": "^6.2.2",
+    "nodemailer": "^6.9.5",
     "package.json": "^0.0.0",
     "pg": "^8.11.1"
   }

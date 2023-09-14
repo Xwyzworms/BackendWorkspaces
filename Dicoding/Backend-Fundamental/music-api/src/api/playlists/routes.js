@@ -4,7 +4,7 @@ function routes(handler) {
     {
       method: 'POST',
       path: '/playlists',
-      handler: handler.postAddPlaylistHandler,
+      handler: handler.postPlaylistHandler,
       options: {
         auth: 'musicapp_jwt',
       },
@@ -12,7 +12,7 @@ function routes(handler) {
     {
       method: 'GET',
       path: '/playlists',
-      handler: handler.getPlaylistHandler,
+      handler: handler.getPlaylistsHandler,
       options: {
         auth: 'musicapp_jwt',
       },

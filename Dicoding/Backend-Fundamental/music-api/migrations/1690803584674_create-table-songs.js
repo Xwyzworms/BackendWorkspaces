@@ -27,7 +27,7 @@ exports.up = (pgm) => {
       type: 'DOUBLE PRECISION',
       notNull: false,
     },
-    albumId: {
+    album_id: {
       type: 'TEXT',
       notNull: false,
     },

@@ -4,7 +4,7 @@
 exports.shorthands = undefined;
 
 exports.up = (pgm) => {
-  pgm.addConstraint('playlists', 'fk_playlists.owner_from_users.id', 'FOREIGN KEY(owner) REFERENCES users(user_id) ON DELETE CASCADE');
+  pgm.addConstraint('playlists', 'fk_playlists.owner_from_users.username', 'FOREIGN KEY(owner) REFERENCES users(username) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
