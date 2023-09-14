@@ -1,5 +1,7 @@
 const Hapi = require("@hapi/hapi");
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const path = require('path');
 
 const users = require("./src/api/users/index");
 const UsersValidator = require("./src/validator/users/index");
@@ -19,14 +21,30 @@ const collaborations = require('./src/api/collaborations');
 const CollaborationService = require('./src/services/postgres/CollaborationService');
 const CollaborationValidator = require('./src/validator/collaborations/index');
 
+//Exports 
+const _exports = require('./src/api/exports');
+const ProducerService = require('./src/services/rabbitmq/ProducerService');
+const ExportValidator = require('./src/validator/exports');
+
+//Uploads
+
+const uploads = require('./src/api/uploads');
+const StorageService = require('./src/services/storage/StorageService');
+const UploadsValidator = require('./src/validator/uploads');
+
+
+//cache
+const CacheService = require('./src/services/redis/CacheService');
 require("dotenv").config();
 
 const initServer = async () => {
 
-  const collaborationService = new CollaborationService();
-  const notesService = new NotesService(collaborationService);
+  const cacheService = new CacheService(); 
+  const collaborationService = new CollaborationService(cacheService);
+  const notesService = new NotesService(collaborationService, cacheService);
   const usersService = new UsersService();
   const authenticationService = new AuthenticationService();
+  const storageService = new StorageService(path.resolve(__dirname, 'src/api/uploads/file/images'));
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -41,6 +59,9 @@ const initServer = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     }
   ]);
 
@@ -91,7 +112,20 @@ const initServer = async () => {
         notesService,
         validator: CollaborationValidator,
       }
-
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        validator: ExportValidator,
+      }
+    },
+    {
+      plugin: uploads,
+      options: {
+        service: storageService,
+        validator: UploadsValidator
+      }
     }
   ]);
 
