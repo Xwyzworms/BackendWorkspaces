@@ -19,7 +19,7 @@ async function init() {
     durable: true,
   });
 
-  channel.consume('export:playlist_by_id', listener.listen, { noAck: true });
+  channel.consume('export:playlist:by_id', listener.listen, { noAck: true });
 }
 
 init();

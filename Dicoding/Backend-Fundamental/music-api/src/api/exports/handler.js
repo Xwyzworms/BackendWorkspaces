@@ -22,6 +22,7 @@ class ExportsHandler {
       await this.playlistsService.verifyPlaylistOwner(owner, playlistId);
 
       await this.playlistsService.getSpecificPlaylist(owner, playlistId);
+
       const message = {
         owner,
         playlistId,

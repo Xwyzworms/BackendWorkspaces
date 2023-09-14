@@ -6,7 +6,7 @@ class PlaylistMailSender {
       host: process.env.MAIL_HOST,
       port: process.env.MAIL_PORT,
       auth: {
-        user: process.env.MAIL_ADDRESS,
+        user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_PASSWORD,
       },
     });
@@ -14,7 +14,7 @@ class PlaylistMailSender {
 
   sendEmail(targetMail, content) {
     const message = {
-      from: 'pratamaAzmiAtmajayaDeveloper@gmail.com',
+      from: process.env.MAIL_ADDRESS,
       to: targetMail,
       subject: 'Ekspor Playlist',
       text: 'Terlampir playlist yang diminta',
