@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.2",
+    "@hapi/inert": "^7.1.0",
     "@hapi/jwt": "^3.2.0",
     "amqp": "^0.2.7",
     "amqplib": "^0.10.3",
@@ -30,6 +31,7 @@
     "node-pg-migrate": "^6.2.2",
     "nodemailer": "^6.9.5",
     "package.json": "^0.0.0",
-    "pg": "^8.11.1"
+    "pg": "^8.11.1",
+    "redis": "^4.6.9"
   }
 }

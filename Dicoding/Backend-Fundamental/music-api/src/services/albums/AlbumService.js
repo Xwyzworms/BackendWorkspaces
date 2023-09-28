@@ -50,6 +50,76 @@ class AlbumsService {
     }
   }
 
+  async editAlbumCoverUrlById(id, coverUrlPath) {
+    const query = {
+      text: `UPDATE albums SET cover_url=$1
+        WHERE album_id=$2 RETURNING album_id`,
+      values: [coverUrlPath, id],
+    };
+    const result = await this.pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError('Gagal update cover_url, album tidak ditemukan');
+    }
+  }
+
+  async isAlbumLikedByUser(albumId, username) {
+    const query = {
+      text: `SELECT users.user_id FROM users LEFT JOIN 
+          users_album_likes ON users.username=users_album_likes.username
+          where users_album_likes.album_id=$1 AND users.username =$2`,
+      values: [albumId, username],
+    };
+
+    const result = await this.pool.query(query);
+    if (result.rows.length) {
+      throw new InvariantError('Already liked by user, cannot do more');
+    }
+  }
+
+  async insertLikesByAlbumId(albumId, userId) {
+    const id = `users_album_likes-${nanoid(16)}`;
+    const query = {
+      text: 'INSERT INTO users_album_likes VALUES ($1, $2, $3) RETURNING id',
+      values: [id, userId, albumId],
+    };
+
+    const result = await this.pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Album Id Not Found');
+    }
+  }
+
+  async deleteLikesByAlbumId(albumId, userId) {
+    const query = {
+      text: `DELETE FROM users_album_likes
+        WHERE username=$1 AND album_id=$2 RETURNING id`,
+      values: [userId, albumId],
+    };
+
+    const result = await this.pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Album Id Not Found');
+    }
+  }
+
+  async getLikesByAlbumId(albumId) {
+    const query = {
+      text: `SELECT COUNT(users.username) FROM users LEFT JOIN 
+          users_album_likes ON users.username=users_album_likes.username
+          where album_id=$1`,
+      values: [albumId],
+    };
+
+    const result = await this.pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError('Album id not found');
+    }
+
+    return result.rows[0].count;
+  }
+
   async deleteAlbumById(id) {
     const query = {
       text: 'DELETE FROM albums where album_id = $1 RETURNING album_id',

@@ -14,11 +14,10 @@ class AuthenticationsHandler {
 
   async postAuthenticationHandler(request, h) {
     this.validator.validatePostAuthenticationPayload(request.payload);
-
     // Validate user credential ( need to be registered )
     const { username, password } = request.payload;
 
-    const id = await this.usersService.verifyUserCredentials({ username, password });
+    const id = await this.usersService.verifyUserCredentials( username, password );
     // Create Token manager
     const accessToken = this.tokenManager.generateAccessToken({ username });
 

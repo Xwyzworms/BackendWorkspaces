@@ -8,6 +8,12 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 class UsersService {
   constructor() {
     this.pool = new Pool();
+
+    this.verifyUsername = this.verifyUsername.bind(this);
+    this.addUser = this.addUser.bind(this);
+    this.verifyUserCredentials = this.verifyUserCredentials.bind(this);
+    this.verifyUserCredentialsByUsername = this.verifyUserCredentialsByUsername.bind(this);
+    this.verifyUsername = this.verifyUsername.bind(this);
   }
 
   async addUser({ username, password, fullname }) {
@@ -39,7 +45,7 @@ class UsersService {
     }
   }
 
-  async verifyUserCredentials({ username, password }) {
+  async verifyUserCredentialsByUsername(username) {
     const query = {
       text: 'SELECT user_id, password FROM users WHERE username=$1',
       values: [username],
@@ -50,6 +56,11 @@ class UsersService {
     if (!result.rows.length > 0) {
       throw new AuthenticationError('Kredensial yang anda berikan salah');
     }
+    return result;
+  }
+
+  async verifyUserCredentials(username, password) {
+    const result = await this.verifyUserCredentialsByUsername(username);
     const { password: hashedPassword } = result.rows[0];
     const userId = result.rows[0].user_id;
     const isMatched = await bcyrpt.compare(password, hashedPassword);
